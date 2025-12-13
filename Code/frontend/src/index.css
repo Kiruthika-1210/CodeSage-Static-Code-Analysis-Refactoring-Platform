@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@layer components {
+  .btn {
+    @apply px-5 py-2 rounded-lg font-semibold text-black
+           bg-gradient-to-r from-[#d4a44d] to-[#b88a33]
+           shadow-[0_4px_10px_rgba(212,164,77,0.3)]
+           transition-all duration-300 ease-in-out
+           hover:bg-black hover:bg-none
+           hover:text-[#d4a44d]
+           hover:border hover:border-[#d4a44d]/70
+           hover:shadow-[0_4px_14px_rgba(212,164,77,0.4)];
+  }
+}
+
+/* Enable class-based dark mode */
+@custom-variant dark (&:where(.dark, .dark *));

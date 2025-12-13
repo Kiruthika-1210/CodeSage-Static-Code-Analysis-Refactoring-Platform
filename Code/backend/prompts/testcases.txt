@@ -1,0 +1,13 @@
+Generate pytest test cases for the provided Python code.
+
+Include:
+- typical cases  
+- edge cases  
+- invalid inputs  
+
+Do NOT modify the function logic or signature.
+
+OUTPUT JSON ONLY:
+{
+  "test_cases": "pytest code..."
+}
