@@ -251,7 +251,7 @@ Guarantees:
 
 ## 👤 Author
 
-**Kiruthika M (Kittu)**  
+**Kiruthika M**  
 AI & DS Student | Aspiring Software Development Engineer
 
 ---
