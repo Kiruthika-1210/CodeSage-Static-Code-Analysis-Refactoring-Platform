@@ -4,7 +4,18 @@ function RefactoredCode({ originalCode, refactoredCode }) {
   const [view, setView] = useState("single"); // single | compare
   const [copied, setCopied] = useState(false);
 
-  if (!refactoredCode) return null;
+  if (!refactoredCode) {
+    return (
+      <div className="mt-8 p-6 rounded-2xl bg-[#0d0d0f] border border-[#1a1a1d] shadow-xl text-white">
+        <h2 className="text-xl font-semibold text-[#d4a44d] mb-4">
+          Refactored Code
+        </h2>
+        <p className="text-gray-400">
+          No code found. Unable to refactor.
+        </p>
+      </div>
+    );
+  }
 
   // COPY
   function handleCopy() {

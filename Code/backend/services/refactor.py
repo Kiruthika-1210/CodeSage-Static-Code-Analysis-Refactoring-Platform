@@ -47,28 +47,21 @@ def run_refactor_step(code, issues):
         # Call Gemini
         response = call_gemini(prompt)
 
-        # Normalize Gemini output
-        if isinstance(response, dict):
-            text = (
-                response.get("text")
-                or response.get("content")
-                or response.get("refactored_code")
-                or ""
-            )
+        if not isinstance(response, dict):
+             result["refactored_code"] = code
+             result["notes"] = "Invalid AI response format"
+             return result
+        
+        refactored_code = response.get("refactored_code", "").strip()
+        raw_notes = response.get("notes", "")
+        if isinstance(raw_notes, list):
+            notes = "• " + "\n• ".join(str(n) for n in raw_notes)
+        elif isinstance(raw_notes, str):
+            notes = raw_notes.strip()
         else:
-            text = str(response)
+            notes = ""
 
-        text = text.strip()
-
-        # Remove markdown fences if present
-        if text.startswith("```"):
-            parts = text.split("```")
-            if len(parts) >= 2:
-                text = parts[1]
-                if text.startswith("python"):
-                    text = text[len("python"):]
-
-        refactored_code = text.strip().replace("\r\n", "\n")
+        refactored_code = response.get("refactored_code", "").strip()
 
         # If empty - fallback
         if not refactored_code:

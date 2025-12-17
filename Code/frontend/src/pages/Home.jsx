@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import CodeEditor from "../components/CodeEditor";
 import IssueList from "../components/IssueList";
@@ -20,8 +20,8 @@ import {
   generateTestCases,
 } from "../utils/api";
 
-
 function Home({ theme, setTheme }) {
+
   // CORE STATE
   const [code, setCode] = useState("");
 
@@ -38,46 +38,85 @@ function Home({ theme, setTheme }) {
   const [explanation, setExplanation] = useState(null);
 
   const [versionHistory, setVersionHistory] = useState([]);
-
   const [testCases, setTestCases] = useState(null);
 
-  // LOAD VERSION HISTORY 
-  useEffect(() => {
-    getVersionHistory()
-      .then(setVersionHistory)
-      .catch(console.error);
-  }, []);
-
-  // RESET ON EMPTY CODE
-  useEffect(() => {
-    if (code.trim() === "") {
-      setIssues([]);
-      setComplexity(null);
-      setScores({ finalScore: null });
-      setRefactoredCode("");
-      setExplanation(null);
-    }
-  }, [code]);
+  const issuesRef = useRef(null);
+  const refactorRef = useRef(null);
+  const testCasesRef = useRef(null);
 
   // DERIVED STATE
+  const isCodeEmpty = !code || code.trim() === "";
+
   const canSaveVersion =
     issues.length > 0 ||
     complexity !== null ||
     scores.finalScore !== null ||
     refactoredCode !== "";
 
+  // LOAD VERSION HISTORY
+  useEffect(() => {
+    getVersionHistory()
+      .then(setVersionHistory)
+      .catch(console.error);
+  }, []);
+
+  // RESET UI ON EMPTY CODE
+  useEffect(() => {
+    if (isCodeEmpty) {
+      setIssues([]);
+      setComplexity(null);
+      setScores({ finalScore: null });
+      setRefactoredCode("");
+      setExplanation(null);
+      setTestCases(null);
+    }
+  }, [isCodeEmpty]);
+
+  function scrollTo(ref) {
+    setTimeout(() => {
+      ref.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  }
+  
+  useEffect(() => {
+    if (explanation) {
+      scrollTo(refactorRef);
+    }
+  }, [explanation]);
+
+  useEffect(() => {
+    if (Array.isArray(testCases)) {
+      scrollTo(testCasesRef);
+    }
+  }, [testCases]);
+
   // HANDLERS
   async function handleAnalyze() {
+    if (isCodeEmpty) {
+      // Clean analyze screen (no backend call)
+      setIssues([]);
+      setComplexity(null);
+      setScores({ finalScore: null });
+      scrollTo(issuesRef);
+      return;
+    }
+
     const result = await analyzeCode(code);
+
     setIssues(result.issues);
+
     const c = result.complexity;
     setComplexity({
       nestingDepth: c.nesting?.max_nesting_depth ?? "—",
       loopDepth: c.loops?.max_loop_depth ?? "—",
       bigO: c.big_o ?? "—",
       score: c.score ?? 0,
-      patterns: c.loops?.nested_loops_detected ? ["Nested Loops"] : []
+      patterns: c.loops?.nested_loops_detected ? ["Nested Loops"] : [],
     });
+
     setScores({
       readability: result.readability,
       maintainability: result.maintainability,
@@ -85,16 +124,32 @@ function Home({ theme, setTheme }) {
       style: result.style,
       finalScore: result.qualityScore,
     });
+    scrollTo(issuesRef);
   }
 
   async function handleRefactor() {
+    if (isCodeEmpty) {
+      setRefactoredCode("");
+      setExplanation("No code found. Unable to refactor.");
+      return;
+    }
+
     const result = await refactorCode(code, issues);
     setRefactoredCode(result.refactoredCode);
     setExplanation(result.explanation);
   }
 
-
   async function handleFullPipeline() {
+    if (isCodeEmpty) {
+      setIssues([]);
+      setComplexity(null);
+      setScores({ finalScore: null });
+      setRefactoredCode("");
+      setExplanation("No code found. Unable to refactor.");
+      scrollTo(issuesRef);
+      return;
+    }
+
     const result = await analyzeAndRefactor(code);
 
     setIssues(result.issues);
@@ -106,10 +161,11 @@ function Home({ theme, setTheme }) {
       documentation: result.documentation,
       finalScore: result.qualityScore,
     });
+
     setRefactoredCode(result.refactoredCode);
     setExplanation(result.explanation);
 
-    // AUTO-SAVE TO BACKEND
+    // AUTO-SAVE VERSION
     await saveVersion({
       original_code: code,
       refactored_code: result.refactoredCode,
@@ -118,9 +174,26 @@ function Home({ theme, setTheme }) {
       qualityScore: result.qualityScore,
     });
 
-    // Reload persisted history
     const history = await getVersionHistory();
     setVersionHistory(history);
+    scrollTo(issuesRef);
+  }
+
+  async function handleGenerateTests() {
+    if (isCodeEmpty) {
+      setTestCases([]);
+      return;
+    }
+
+    try {
+      const tests = await generateTestCases(
+        refactoredCode || code,
+        issues
+      );
+      setTestCases(tests);
+    } catch (err) {
+      console.error("Test case generation failed", err);
+    }
   }
 
   async function handleSaveVersion() {
@@ -145,44 +218,24 @@ function Home({ theme, setTheme }) {
     const history = await getVersionHistory();
     setVersionHistory(history);
   }
-  
+
   async function handleClearAllVersions() {
     await clearAllVersions();
     setVersionHistory([]);
   }
 
-  async function handleGenerateTests() {
-    try {
-      const tests = await generateTestCases(
-        refactoredCode || code, // prefer refactored code
-        issues
-      );
-      setTestCases(tests);
-    } catch (err) {
-      console.error("Test case generation failed", err);
-    }
-  }
-
-
   // RENDER
   return (
-    <div
-      className="min-h-screen bg-neutral-100 dark:bg-neutral-950
-                 text-neutral-900 dark:text-neutral-100
-                 transition-colors duration-300"
-    >
+    <div className="min-h-screen bg-neutral-100 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
       <div className="mx-auto max-w-6xl px-6 py-8 space-y-8">
 
         {/* THEME TOGGLE */}
         <div className="flex justify-end">
           <button
-            onClick={() =>
-              setTheme(theme === "dark" ? "light" : "dark")
-            }
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="px-3 py-1 rounded-lg text-sm font-medium
                        border border-neutral-700 dark:border-neutral-600
-                       hover:bg-neutral-200 dark:hover:bg-neutral-800
-                       transition"
+                       hover:bg-neutral-200 dark:hover:bg-neutral-800 transition"
           >
             {theme === "dark" ? "Light Mode" : "Dark Mode"}
           </button>
@@ -197,30 +250,34 @@ function Home({ theme, setTheme }) {
           onGenerateTests={handleGenerateTests}
         />
 
-        <IssueList
-          issues={issues}
-          activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
-          onIssueClick={(line) => console.log("Jump to line:", line)}
-        />
+        <div ref={issuesRef}>
+          <IssueList
+            issues={issues}
+            activeFilter={activeFilter}
+            setActiveFilter={setActiveFilter}
+            onIssueClick={(line) => console.log("Jump to line:", line)}
+          />
+        </div>
 
         {complexity && <ComplexityPanel data={complexity} />}
-
         {scores.finalScore !== null && <ScorePanel data={scores} />}
 
         {refactoredCode && (
-          <RefactoredCode
-            originalCode={code}
-            refactoredCode={refactoredCode}
-          />
+          <div ref={refactorRef}>
+            <RefactoredCode
+              originalCode={code}
+              refactoredCode={refactoredCode}
+            />
+          </div>
         )}
 
         {explanation && <ExplanationPanel data={explanation} />}
 
         {Array.isArray(testCases) && (
-          <TestCasesPanel testCases={testCases} />
+          <div ref={testCasesRef}>
+            <TestCasesPanel testCases={testCases} />
+          </div>
         )}
-
 
         <VersionHistory
           versions={versionHistory}

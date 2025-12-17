@@ -3,8 +3,19 @@ import { useState } from "react";
 function TestCasesPanel({ testCases }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (!Array.isArray(testCases) || testCases.length === 0) {
-    return null;
+  if (!Array.isArray(testCases)) return null;
+
+  if (Array.isArray(testCases) && testCases.length === 0) {
+    return (
+      <div className="mt-8 p-6 rounded-2xl bg-[#0d0d0f] border border-[#1a1a1d] shadow-xl text-white">
+        <h2 className="text-xl font-semibold text-[#d4a44d] mb-4">
+          Test Cases
+        </h2>
+        <p className="text-gray-400">
+          No code found. Unable to generate test cases.
+        </p>
+      </div>
+    );
   }
 
   const activeCase = testCases[activeIndex];
