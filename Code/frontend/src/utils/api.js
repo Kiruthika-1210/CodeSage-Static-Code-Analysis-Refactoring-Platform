@@ -1,4 +1,4 @@
-const BASE_URL = "https://codesage-backend-eg56.onrender.com";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // SESSION ID (STABLE & PERSISTENT)
 export const sessionId =
