@@ -21,9 +21,18 @@ from datetime import datetime
 import difflib
 from typing import Optional, Any, Tuple
 
-DEFAULT_DB_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "database", "versions.db")
-)
+IS_RENDER = os.environ.get("RENDER") == "true"
+
+if IS_RENDER:
+    DB_DIR = "/tmp/codesage"
+else:
+    DB_DIR = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "database")
+    )
+
+os.makedirs(DB_DIR, exist_ok=True)
+DEFAULT_DB_PATH = os.path.join(DB_DIR, "versions.db")
+
 
 # ---------------------------
 # Database helpers
