@@ -2,6 +2,18 @@
 
 > A safe, explainable, and developer-first AI code debugger that combines deterministic static analysis with controlled AI refactoring.
 
+## 🌐 Live Demo
+
+👉 **Live Application:** https://codesage-nine.vercel.app
+
+<details>
+<summary>Backend & API</summary>
+
+- Backend API: https://codesage-backend-eg56.onrender.com
+- Swagger Docs: https://codesage-backend-eg56.onrender.com/docs
+
+</details>
+
 CodeSage is a developer-focused platform that performs **static code analysis, complexity evaluation, quality scoring, AI-based refactoring, test case generation, and Git-like version tracking** — all within a single, unified workflow.
 
 Unlike simple linters or AI-only refactor tools, **CodeSage blends rule-based analysis with AI assistance**, ensuring **accuracy, safety, and explainability** at every step.
