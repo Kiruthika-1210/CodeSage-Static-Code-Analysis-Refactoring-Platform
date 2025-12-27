@@ -11,10 +11,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://codesage-nine.vercel.app",  # your frontend
-        "http://localhost:5173",              # local dev
-    ],
+    allow_origins=["*"],   # TEMPORARY — to confirm CORS
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
