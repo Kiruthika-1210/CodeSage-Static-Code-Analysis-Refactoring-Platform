@@ -1,4 +1,4 @@
-# CodeSage — AI-Powered Code Analysis & Refactoring Platform
+# CodeSage – Static Code Analysis & Refactoring Platform
 
 > A safe, explainable, and developer-first AI code debugger that combines deterministic static analysis with controlled AI refactoring.
 
