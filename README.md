@@ -227,61 +227,12 @@ Guarantees:
 
 ## 🧩 System Architecture
 
-```mermaid
-graph TD
-    subgraph Frontend [Frontend (React - Vite)]
-        UI[CodeMirror Editor]
-        MP[Metrics & Issues Panels]
-        RP[Refactored Code Panel]
-        DV[Diff Viewer]
-        TV[Test Case Viewer]
-    end
+<details>
+<summary>📷 High-resolution architecture diagram</summary>
 
-    subgraph Backend [FastAPI Backend]
-        AST[AST Static Analyzer (deterministic)]
-        COMP[Complexity Analysis Engine]
-        QUAL[Quality Scoring Engine]
-        GUARD[AI Refactor Guard<br/>(controlled AI + syntax validation)]
-        DIFF[Diff Generator]
-        TCG[Test Case Generator (behavior-based)]
-        VM[Version Manager (snapshot persistence)]
-    end
+![CodeSage Architecture](Code/codesage-architecture.png)
 
-    subgraph AI_Service [AI Service]
-        Gemini[Google Gemini API]
-    end
-
-    subgraph Storage [Database]
-        DB[(SQLite Database)]
-    end
-
-    %% Deterministic Analysis
-    UI -- "Analyze Code" --> AST
-    AST --> COMP --> QUAL
-    QUAL -- "Analysis Results & Metrics" --> MP
-
-    %% Safe AI Refactoring
-    UI -- "Request Safe Refactor" --> GUARD
-    GUARD -- "Refactor Request" --> Gemini
-    Gemini -- "Refactored Code" --> GUARD
-
-    %% Post-AI Processing
-    GUARD -- "Validate & Generate Diff" --> DIFF
-    DIFF --> DV
-    DIFF --> RP
-
-    %% Test Cases & Versioning
-    DIFF --> TCG -- "Generate Test Cases" --> TV
-    TCG --> VM
-    VM -- "Save Version Snapshot" --> DB
-    DB -- "Fetch History & Results" --> UI
-
-    %% Styling
-    style Backend fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style Frontend fill:#e3f2fd,stroke:#1565c0
-    style AI_Service fill:#fff3e0,stroke:#ef6c00
-    style Storage fill:#f1f8e9,stroke:#2e7d32
-```
+</details>
 
 ---
 
