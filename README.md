@@ -227,12 +227,10 @@ Guarantees:
 
 ## 🧩 System Architecture
 
-<details>
-<summary>📷 High-resolution architecture diagram</summary>
+High-resolution architecture diagram
 
 ![CodeSage Architecture](Code/codesage-architecture.png)
 
-</details>
 
 ---
 
